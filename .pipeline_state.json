@@ -1,0 +1,12 @@
+{
+  "active_stage": "stage_3_patch",
+  "status": "awaiting_approval",
+  "message": "Terraform patch drafted. Awaiting human approval to proceed.",
+  "stages": {
+    "stage_1_ingestion": "completed",
+    "stage_2_rca": "completed",
+    "stage_3_patch": "awaiting_approval",
+    "stage_4_execution": "completed"
+  },
+  "awaiting_approval": true
+}

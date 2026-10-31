@@ -1,0 +1,10 @@
+venv/
+__pycache__/
+.DS_Store
+tfplan
+remediation_patch.tf
+raw_model_response.json
+*.log
+*.env
+env.txt
+.metrics_log.json
