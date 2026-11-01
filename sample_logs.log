@@ -1,0 +1,117 @@
+# Synthetic Kubernetes / Java payment-api incident log
+# Scenario: traffic surge -> queue growth / GC pressure -> Java heap OOM -> exit 137 -> CrashLoopBackOff
+# All service names, identifiers, metrics, and events are fictional test data.
+2026-10-27T12:00:00 INFO  [auth-service] Health check OK; readiness probe succeeded
+2026-10-27T12:00:02 INFO  [payment-api] Application started; build=payment-api:2.8.14; pod=payment-deployment-789f
+2026-10-27T12:00:04 INFO  [payment-api] JVM configured: -Xms256m -Xmx384m; container memory limit=512Mi
+2026-10-27T12:00:06 INFO  [payment-api] Database connection pool initialized; maxPoolSize=40; active=0; idle=40
+2026-10-27T12:00:08 INFO  [payment-api] Kafka consumer group payment-events joined; partitions=12
+2026-10-27T12:00:10 INFO  [ingress-controller] Upstream payment-api endpoints available=3
+2026-10-27T12:00:12 INFO  [payment-api] Ingestion pipeline processing 1800 req/min; p95_latency=118ms
+2026-10-27T12:00:20 INFO  [metrics-agent] payment-api heap_used=176Mi heap_committed=256Mi heap_max=384Mi
+2026-10-27T12:00:30 INFO  [payment-api] Batch processor started; batch_size=500; parallel_workers=8
+2026-10-27T12:00:45 INFO  [payment-api] Ingestion pipeline processing 2600 req/min; p95_latency=142ms
+2026-10-27T12:01:00 INFO  [payment-api] Ingestion pipeline processing 3100 req/min; p95_latency=175ms
+2026-10-27T12:01:02 INFO  [metrics-agent] heap_used=205Mi heap_max=384Mi old_gen_used=92Mi; gc_pause_total=1.8s
+2026-10-27T12:01:04 WARN  [payment-api] Pending payment enrichment queue growing; queue_depth=1200; oldest_message_age=3s
+2026-10-27T12:01:06 INFO  [payment-api] Batch processor completed; batch_size=500; duration=87ms; retained_objects_estimate=400
+2026-10-27T12:01:15 INFO  [payment-api] Ingestion pipeline processing 3400 req/min; p95_latency=188ms
+2026-10-27T12:01:17 INFO  [metrics-agent] heap_used=228Mi heap_max=384Mi old_gen_used=104Mi; gc_pause_total=1.8s
+2026-10-27T12:01:19 WARN  [payment-api] Pending payment enrichment queue growing; queue_depth=2100; oldest_message_age=4s
+2026-10-27T12:01:21 INFO  [payment-api] Batch processor completed; batch_size=500; duration=94ms; retained_objects_estimate=700
+2026-10-27T12:01:30 INFO  [payment-api] Ingestion pipeline processing 3800 req/min; p95_latency=230ms
+2026-10-27T12:01:32 INFO  [metrics-agent] heap_used=251Mi heap_max=384Mi old_gen_used=119Mi; gc_pause_total=1.8s
+2026-10-27T12:01:34 WARN  [payment-api] Pending payment enrichment queue growing; queue_depth=3400; oldest_message_age=5s
+2026-10-27T12:01:36 INFO  [payment-api] Batch processor completed; batch_size=500; duration=115ms; retained_objects_estimate=1133
+2026-10-27T12:01:45 INFO  [payment-api] Ingestion pipeline processing 4200 req/min; p95_latency=310ms
+2026-10-27T12:01:47 INFO  [metrics-agent] heap_used=279Mi heap_max=384Mi old_gen_used=138Mi; gc_pause_total=1.8s
+2026-10-27T12:01:49 WARN  [payment-api] Pending payment enrichment queue growing; queue_depth=5100; oldest_message_age=5s
+2026-10-27T12:01:51 INFO  [payment-api] Batch processor completed; batch_size=500; duration=155ms; retained_objects_estimate=1700
+2026-10-27T12:02:00 INFO  [payment-api] Ingestion pipeline processing 4500 req/min; p95_latency=480ms
+2026-10-27T12:02:02 INFO  [metrics-agent] heap_used=310Mi heap_max=384Mi old_gen_used=161Mi; gc_pause_total=1.8s
+2026-10-27T12:02:04 WARN  [payment-api] Pending payment enrichment queue growing; queue_depth=7200; oldest_message_age=6s
+2026-10-27T12:02:06 INFO  [payment-api] Batch processor completed; batch_size=500; duration=240ms; retained_objects_estimate=2400
+2026-10-27T12:02:15 INFO  [payment-api] Ingestion pipeline processing 4700 req/min; p95_latency=720ms
+2026-10-27T12:02:17 INFO  [metrics-agent] heap_used=337Mi heap_max=384Mi old_gen_used=183Mi; gc_pause_total=1.8s
+2026-10-27T12:02:19 WARN  [payment-api] Pending payment enrichment queue growing; queue_depth=9400; oldest_message_age=7s
+2026-10-27T12:02:21 INFO  [payment-api] Batch processor completed; batch_size=500; duration=360ms; retained_objects_estimate=3133
+2026-10-27T12:02:30 INFO  [payment-api] Ingestion pipeline processing 4800 req/min; p95_latency=1100ms
+2026-10-27T12:02:32 INFO  [metrics-agent] heap_used=356Mi heap_max=384Mi old_gen_used=201Mi; gc_pause_total=1.8s
+2026-10-27T12:02:34 WARN  [payment-api] Pending payment enrichment queue growing; queue_depth=11800; oldest_message_age=8s
+2026-10-27T12:02:36 INFO  [payment-api] Batch processor completed; batch_size=500; duration=550ms; retained_objects_estimate=3933
+2026-10-27T12:02:45 WARN  [payment-api] JVM memory pressure detected; heap_used=360Mi of 384Mi; allocation_rate=38Mi/s
+2026-10-27T12:02:46 INFO  [payment-api] Garbage collection completed; collector=G1 Young; pause=425ms; reclaimed=30Mi
+2026-10-27T12:02:48 WARN  [payment-api] GC overhead increasing; recent_gc_time_pct=30; request_backlog=12000
+2026-10-27T12:02:50 WARN  [payment-api] Database pool utilization high; active=36; idle=1; waiters=22
+2026-10-27T12:02:52 ERROR [payment-api] Payment enrichment task delayed; transaction_batch_id=pb-83000; elapsed=3035ms; status=RETRY_PENDING
+2026-10-27T12:03:00 WARN  [payment-api] JVM memory pressure detected; heap_used=362Mi of 384Mi; allocation_rate=38Mi/s
+2026-10-27T12:03:00 INFO  [platform-observer] Database CPU=61%; active_connections=38; max_connections=200
+2026-10-27T12:03:01 INFO  [payment-api] Garbage collection completed; collector=G1 Young; pause=310ms; reclaimed=25Mi
+2026-10-27T12:03:03 WARN  [payment-api] GC overhead increasing; recent_gc_time_pct=32; request_backlog=12850
+2026-10-27T12:03:05 WARN  [payment-api] Database pool utilization high; active=36; idle=2; waiters=71
+2026-10-27T12:03:15 WARN  [payment-api] JVM memory pressure detected; heap_used=364Mi of 384Mi; allocation_rate=38Mi/s
+2026-10-27T12:03:16 INFO  [payment-api] Garbage collection completed; collector=G1 Young; pause=386ms; reclaimed=13Mi
+2026-10-27T12:03:18 WARN  [payment-api] GC overhead increasing; recent_gc_time_pct=29; request_backlog=13700
+2026-10-27T12:03:20 WARN  [payment-api] Database pool utilization high; active=35; idle=3; waiters=70
+2026-10-27T12:03:22 ERROR [payment-api] Payment enrichment task delayed; transaction_batch_id=pb-83002; elapsed=3084ms; status=RETRY_PENDING
+2026-10-27T12:03:30 WARN  [payment-api] JVM memory pressure detected; heap_used=366Mi of 384Mi; allocation_rate=38Mi/s
+2026-10-27T12:03:30 INFO  [platform-observer] Kafka consumer lag for payment-events increased to 14200 messages
+2026-10-27T12:03:31 INFO  [payment-api] Garbage collection completed; collector=G1 Young; pause=473ms; reclaimed=28Mi
+2026-10-27T12:03:33 WARN  [payment-api] GC overhead increasing; recent_gc_time_pct=24; request_backlog=14550
+2026-10-27T12:03:35 WARN  [payment-api] Database pool utilization high; active=38; idle=6; waiters=45
+2026-10-27T12:03:45 WARN  [payment-api] JVM memory pressure detected; heap_used=368Mi of 384Mi; allocation_rate=38Mi/s
+2026-10-27T12:03:46 INFO  [payment-api] Garbage collection completed; collector=G1 Young; pause=393ms; reclaimed=31Mi
+2026-10-27T12:03:48 WARN  [payment-api] GC overhead increasing; recent_gc_time_pct=23; request_backlog=15400
+2026-10-27T12:03:50 WARN  [payment-api] Database pool utilization high; active=39; idle=3; waiters=40
+2026-10-27T12:03:52 ERROR [payment-api] Payment enrichment task delayed; transaction_batch_id=pb-83004; elapsed=2599ms; status=RETRY_PENDING
+2026-10-27T12:04:00 WARN  [payment-api] JVM memory pressure detected; heap_used=370Mi of 384Mi; allocation_rate=38Mi/s
+2026-10-27T12:04:00 INFO  [platform-observer] No database failover or network partition detected
+2026-10-27T12:04:01 INFO  [payment-api] Garbage collection completed; collector=G1 Young; pause=424ms; reclaimed=16Mi
+2026-10-27T12:04:03 WARN  [payment-api] GC overhead increasing; recent_gc_time_pct=26; request_backlog=16250
+2026-10-27T12:04:05 WARN  [payment-api] Database pool utilization high; active=38; idle=2; waiters=57
+2026-10-27T12:04:15 WARN  [payment-api] JVM memory pressure detected; heap_used=372Mi of 384Mi; allocation_rate=38Mi/s
+2026-10-27T12:04:16 INFO  [payment-api] Garbage collection completed; collector=G1 Young; pause=296ms; reclaimed=30Mi
+2026-10-27T12:04:18 WARN  [payment-api] GC overhead increasing; recent_gc_time_pct=38; request_backlog=17100
+2026-10-27T12:04:20 WARN  [payment-api] Database pool utilization high; active=35; idle=0; waiters=43
+2026-10-27T12:04:22 ERROR [payment-api] Payment enrichment task delayed; transaction_batch_id=pb-83006; elapsed=4974ms; status=RETRY_PENDING
+2026-10-27T12:04:30 WARN  [payment-api] JVM memory pressure detected; heap_used=374Mi of 384Mi; allocation_rate=38Mi/s
+2026-10-27T12:04:30 INFO  [platform-observer] Node memory pressure condition=False; available_memory=5.8Gi
+2026-10-27T12:04:31 INFO  [payment-api] Garbage collection completed; collector=G1 Young; pause=199ms; reclaimed=29Mi
+2026-10-27T12:04:33 WARN  [payment-api] GC overhead increasing; recent_gc_time_pct=38; request_backlog=17950
+2026-10-27T12:04:35 WARN  [payment-api] Database pool utilization high; active=34; idle=1; waiters=47
+2026-10-27T12:04:45 WARN  [payment-api] JVM memory pressure detected; heap_used=376Mi of 384Mi; allocation_rate=38Mi/s
+2026-10-27T12:04:46 INFO  [payment-api] Garbage collection completed; collector=G1 Young; pause=257ms; reclaimed=16Mi
+2026-10-27T12:04:48 WARN  [payment-api] GC overhead increasing; recent_gc_time_pct=39; request_backlog=18800
+2026-10-27T12:04:50 WARN  [payment-api] Database pool utilization high; active=34; idle=1; waiters=59
+2026-10-27T12:04:52 ERROR [payment-api] Payment enrichment task delayed; transaction_batch_id=pb-83008; elapsed=2623ms; status=RETRY_PENDING
+2026-10-27T12:05:00 ERROR [payment-api] java.lang.OutOfMemoryError: Java heap space
+2026-10-27T12:05:01 ERROR [payment-api] Failed to allocate 8 MiB for payment enrichment buffer; heap_used=383Mi; heap_max=384Mi
+2026-10-27T12:05:02 WARN  [payment-api] Request processing stalled; in_flight_requests=1842; completed_requests_last_10s=17
+2026-10-27T12:05:03 ERROR [payment-api] Unhandled exception in batch worker; batch_id=pb-83142; java.lang.OutOfMemoryError: Java heap space
+2026-10-27T12:05:04 FATAL [k8s-pod-watcher] Container 'payment-api' in pod 'payment-deployment-789f' exited with status code 137 (OOMKilled)
+2026-10-27T12:05:05 WARN  [k8s-pod-watcher] Restarting container payment-api... (Attempt 3/5)
+2026-10-27T12:05:06 ERROR [k8s-pod-watcher] Pod payment-deployment-789f entered CrashLoopBackOff state due to memory resource constraints; Current limit: memory=512Mi
+2026-10-27T12:05:07 INFO  [k8s-pod-watcher] Previous container state: terminated; reason=OOMKilled; exitCode=137; restartCount=3
+2026-10-27T12:05:08 WARN  [deployment-controller] ReplicaSet payment-deployment desired=3 available=1 unavailable=2
+2026-10-27T12:05:09 ERROR [ingress-controller] Upstream payment-api has insufficient healthy endpoints; returning HTTP 503 for affected requests
+2026-10-27T12:05:15 INFO  [platform-observer] Payment database health check OK; query_error_rate=0.2%
+2026-10-27T12:05:30 INFO  [k8s-pod-watcher] Starting container payment-api; restart_attempt=4
+2026-10-27T12:05:32 INFO  [payment-api] JVM startup complete; heap_max=384Mi; container_memory_limit=512Mi
+2026-10-27T12:05:35 INFO  [payment-api] Readiness probe passed
+2026-10-27T12:05:40 INFO  [payment-api] Kafka consumer group payment-events resumed; partitions=12
+2026-10-27T12:05:45 WARN  [payment-api] Backlog replay started; queued_messages=14600; worker_count=8
+2026-10-27T12:05:45 INFO  [platform-observer] Kafka broker health check OK; under_replicated_partitions=0
+2026-10-27T12:05:50 WARN  [metrics-agent] Container working_set_memory=486Mi; limit=512Mi; memory headroom=26Mi
+2026-10-27T12:05:54 ERROR [payment-api] java.lang.OutOfMemoryError: Java heap space while replaying queued payment events
+2026-10-27T12:05:55 FATAL [k8s-pod-watcher] Container payment-api terminated; reason=OOMKilled; exitCode=137
+2026-10-27T12:05:56 WARN  [k8s-pod-watcher] CrashLoopBackOff; restart backoff increased
+2026-10-27T12:06:30 INFO  [k8s-pod-watcher] Starting container payment-api; restart_attempt=5
+2026-10-27T12:06:32 INFO  [payment-api] JVM startup complete; heap_max=384Mi; container_memory_limit=512Mi
+2026-10-27T12:06:35 INFO  [payment-api] Readiness probe passed
+2026-10-27T12:06:40 INFO  [payment-api] Kafka consumer group payment-events resumed; partitions=12
+2026-10-27T12:06:45 WARN  [payment-api] Backlog replay started; queued_messages=14600; worker_count=8
+2026-10-27T12:06:50 WARN  [metrics-agent] Container working_set_memory=486Mi; limit=512Mi; memory headroom=26Mi
+2026-10-27T12:06:54 ERROR [payment-api] java.lang.OutOfMemoryError: Java heap space while replaying queued payment events
+2026-10-27T12:06:55 FATAL [k8s-pod-watcher] Container payment-api terminated; reason=OOMKilled; exitCode=137
+2026-10-27T12:06:56 WARN  [k8s-pod-watcher] CrashLoopBackOff; restart backoff increased
+2026-10-27T12:07:00 INFO  [platform-observer] Node memory pressure condition=False; kubelet reports node healthy
